@@ -1,0 +1,46 @@
+services:
+  backend:
+    build: ./backend
+    command: fastapi run main.py
+    env_file: .env.prod
+    expose:
+      - 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+  frontend:
+    build: ./latex_app
+    command: serve -s build
+    expose:
+      - 3000
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:17
+    restart: always
+    environment:
+      - POSTGRES_DB=db_formula
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGUSER=postgres
+    container_name: pgdb
+    volumes:
+      - pgdbdata:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  pgdbdata:
