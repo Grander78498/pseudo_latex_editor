@@ -46,6 +46,7 @@ class Expression(SQLModel, table=True):
     '''
     __tablename__ = 'expression'
     id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(nullable=True)
     expr: str = Field()
 
 

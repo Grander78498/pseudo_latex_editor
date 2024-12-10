@@ -7,11 +7,9 @@ export default function useFetch(url) {
     const [isError, setError] = useState(true);
 
     useEffect(() => {
-        console.log(url);
         fetch(url)
         .then(async (resp) => {
             let json = await resp.json();
-            console.log(json);
             setResponse(json);
             setPending(false);
             setError(false);

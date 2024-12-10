@@ -1,4 +1,5 @@
 from typing import Annotated, AsyncGenerator
+from itertools import product
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
@@ -15,21 +16,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(lifespan=lifespan, docs_url='/api/docs')
 
-origins = [
-    'http://localhost:3000',
-    'http://frontend:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:1337',
-    'http://frontend:1337',
-    'http://127.0.0.1:1337'
-]
-
-
-
-@app.get('/api')
-async def main() -> dict[str, str]:
-    return {"message": "Hello world"}
-
+ip_addresses = ['localhost', '127.0.0.1', '192.168.1.12']
+ports = ['3000', '1337', '80', '']
+origins = [f'http://{ip}{":" + port if port else ""}' for (ip, port) in product(ip_addresses, ports)]
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +27,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get('/api')
+async def main() -> dict[str, str]:
+    return {"message": "Hello world"}
 
 
 @app.get('/api/formula')

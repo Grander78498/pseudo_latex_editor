@@ -25,7 +25,6 @@ const MathEditor = () => {
 
     const insertTextAtCursor = (text) => {
         const textarea = textareaRef.current;
-        console.log(text);
         if (textarea) {
             const startPos = textarea.selectionStart;
             const endPos = textarea.selectionEnd;
@@ -80,8 +79,6 @@ const MathEditor = () => {
         cols={50}
         placeholder="Введите вашу формулу..."
         onChange={e => {
-            console.log(e);
-            if (e.ctrlKey && e.key === 'z') console.log(e.target.value);
             changeFormula(e.target.value);
         }}
         onKeyDown={e => {
