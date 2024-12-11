@@ -1,6 +1,8 @@
 import { MathJax } from "better-react-mathjax";
 import { useState, useRef } from "react";
-import Buttons from "./Buttons";
+import Buttons from "./Buttons.jsx";
+import EditorFooter from "./EditorFooter.jsx";
+import Stack from "react-bootstrap/Stack";
 
 const maxHistoryLength = 100;
 
@@ -18,8 +20,6 @@ const MathEditor = () => {
             return res;
         });
         else setHistory([f]);
-        const parenRegex = /\{\}/g;
-        f = f.replaceAll(parenRegex, "{?}");
         setFormula(f);
     }
 
@@ -72,7 +72,7 @@ const MathEditor = () => {
     }
 
     return (
-    <div>
+    <Stack gap={3}>
         <textarea
         ref={textareaRef}
         rows={10}
@@ -87,15 +87,12 @@ const MathEditor = () => {
         />
         <div>
         <Buttons handleButtonClick={handleButtonClick}/>
-        {/* Добавьте другие кнопки по мере необходимости */}
         </div>
-        <div>
-            <h1>Предварительный просмотр</h1>
-            <MathJax dynamic>
-                <span>{`$$${formula}$$`}</span>
-            </MathJax>
-        </div>
-    </div>
+        <MathJax dynamic>
+            <span>{`$$${formula.replaceAll(/\{\}/g, "{?}")}$$`}</span>
+        </MathJax>
+        <EditorFooter />
+    </Stack>
     );
 };
 

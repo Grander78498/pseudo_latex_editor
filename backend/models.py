@@ -4,10 +4,11 @@
 
 
 import os
+import json
 from typing import AsyncGenerator
 from pathlib import Path
 from dotenv import load_dotenv
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship, select, insert, update
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -40,14 +41,28 @@ class Formula(SQLModel, table=True):
     formula: str = Field(index=True)
 
 
+class ExpressionGroup(SQLModel, table=True):
+    '''
+    Таблица для сгруппированных формул
+    '''
+    __tablename__ = 'expr_group'
+    id: int | None = Field(default=None, primary_key=True)
+    main_expr: str = Field()
+
+    expressions: list["Expression"] = Relationship(back_populates="group")
+
+
 class Expression(SQLModel, table=True):
     '''
     Таблица для хранения возможных кнопок в редакторе формул
     '''
     __tablename__ = 'expression'
     id: int | None = Field(default=None, primary_key=True)
-    name: str = Field(nullable=True)
+    name: str | None = Field(nullable=True)
     expr: str = Field()
+
+    group_id: int | None = Field(default=None, foreign_key="expr_group.id")
+    group: ExpressionGroup | None = Relationship(back_populates="expressions")
 
 
 async def init_db() -> None:

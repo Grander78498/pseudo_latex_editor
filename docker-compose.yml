@@ -10,12 +10,10 @@ services:
         condition: service_healthy
   
   frontend:
-    build: ./latex_app
-    command: serve -s build
+    build: ./frontend
+    command: serve -s dist
     expose:
       - 3000
-    depends_on:
-      - backend
 
   postgres:
     image: postgres:17

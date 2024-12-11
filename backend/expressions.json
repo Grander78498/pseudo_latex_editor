@@ -1,0 +1,44 @@
+{
+    "expressions": [
+        {
+            "expr": "\\frac{}{}",
+            "name": "Дробь"
+        },
+        {
+            "expr": "{}^{}",
+            "name": "Степень"
+        },
+        {
+            "expr": "\\sqrt{}",
+            "name": "Квадратный корень"
+        }
+    ],
+    "expression_groups": [
+        {
+            "main_expr": "\\alpha",
+            "expressions": [
+                {
+                    "expr": "\\alpha",
+                    "name": "Альфа"
+                },
+                {
+                    "expr": "\\beta",
+                    "name": "Бета"
+                }
+            ]
+        },
+        {
+            "main_expr": "\\pm",
+            "expressions": [
+                {
+                    "expr": "\\pm",
+                    "name": "Плюс-минус"
+                },
+                {
+                    "expr": "\\approx",
+                    "name": "Приблизительно равно"
+                }
+            ]
+        }
+    ]
+}
