@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import env from './env.json';
 import OverlayButton from "./OverlayButton.jsx";
 import OverlayDropdown from "./OverlayDropdown.jsx";
+import Stack from "react-bootstrap/Stack";
 
 export default function Buttons({handleButtonClick}) {
     const host = import.meta.env.VITE_API_HOST ? import.meta.env.VITE_API_HOST : env.API_HOST;
@@ -17,7 +18,7 @@ export default function Buttons({handleButtonClick}) {
 
     return (
         <div className="justify-content-center gap-1 mb-2">
-            {isPending && <Spinner animation="border" role="status">
+            {(isPending || isError) && <Spinner animation="border" role="status">
                             <span className="visually-hidden">Загрузка...</span>
                           </Spinner>
             }
@@ -31,21 +32,17 @@ export default function Buttons({handleButtonClick}) {
                                         </MathJax>}
                                     />
             })}
-            {!isPending && !isError && <Container>
-                <Row className="d-flex align-center">
+            {!isPending && !isError && <Stack direction="horizontal" className="justify-content-center">
                 {groups.map((f, index) => {
-                    return <Col>
-                            <OverlayDropdown buttons={f.expressions}
+                    return <OverlayDropdown buttons={f.expressions}
                                             handleButtonClick={handleButtonClick}
                                             key={index}
                                             title={<MathJax>
                                                 <span className="sm">{`\\(${f.main_expr.replaceAll(/\{\}/g, "{?}")}\\)`}</span>
                                             </MathJax>}
                             />
-                            </Col>
                 })}
-                </Row>
-            </Container>}
+            </Stack>}
         </div>
     )
 }

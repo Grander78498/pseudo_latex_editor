@@ -10,7 +10,7 @@ function App() {
   return (
     <MathJaxContext>   
       <div className="App">
-        <Stack gap={3} className='col-md-7'>
+        <Stack gap={3} className='justify-content-center'>
           <Header />
           <Routes>
             <Route index element={<MathEditor/>}/>

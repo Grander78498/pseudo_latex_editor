@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan, docs_url='/api/docs')
 
 ip_addresses = ['localhost', '127.0.0.1', '192.168.1.12']
-ports = ['3000', '1337', '80', '']
+ports = ['3000', '1337', '80', '', '5173']
 origins = [f'http://{ip}{":" + port if port else ""}' for (ip, port) in product(ip_addresses, ports)]
 
 app.add_middleware(

@@ -7,19 +7,24 @@ export default function useFetch(url) {
     const [isError, setError] = useState(true);
 
     useEffect(() => {
-        fetch(url)
-        .then(async (resp) => {
-            let json = await resp.json();
-            setResponse(json);
-            setPending(false);
-            setError(false);
-            return json;
-        })
-        .catch(e => {
-            console.log(e);
-            setError(true);
-            setPending(false);
-        })
+        let interval = setInterval(() => {
+            fetch(url)
+            .then(async (resp) => {
+                let json = await resp.json();
+                setResponse(json);
+                setPending(false);
+                setError(false);
+                clearInterval(interval);
+                return json;
+            })
+            .catch(e => {
+                console.log(e);
+                setError(true);
+                setPending(false);
+            })
+        },
+        1000
+        );
     }, [url]);
 
     return [response, isPending, isError];

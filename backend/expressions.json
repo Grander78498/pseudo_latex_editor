@@ -24,6 +24,18 @@
                 {
                     "expr": "\\beta",
                     "name": "Бета"
+                },
+                {
+                    "expr": "\\gamma",
+                    "name": "Гамма"
+                },
+                {
+                    "expr": "\\delta",
+                    "name": "Дельта"
+                },
+                {
+                    "expr": "\\zeta",
+                    "name": "Дзета"
                 }
             ]
         },
