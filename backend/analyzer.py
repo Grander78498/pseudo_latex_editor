@@ -14,24 +14,26 @@ def find_diffrencies(tree1, tree2):
 
     :param tree1: Pre-ordered list of first tree's nodes
     :param tree2: Pre-ordered list of second tree's nodes
-    :return: (Pre-ordered list of diffrence tree's nodes, simmilarity score)
+    :return: (Two pre-ordered lists of diffrences tree's nodes, simmilarity score)
     """
 
     score = 0
     total = 0
-    diff = ndiff(tree1, tree2)
-    compared_tree = []
+    diff = ndiff(tree1, tree2)  # Compare node-by-node
+    first_tree = []  # Elements that are in the fisrt tree but not in the second
+    second_tree = []  # Elements that are in the second tree but not in the first
     for line in diff:
         total += 1
         if line.startswith("+") and line != '+':
-            compared_tree.append(f"\\textcolor{{green}}{{{line[2:]}}}")
             score += 1
+            second_tree.append(f"\\textcolor{{green}}{{{line[2:]}}}")
         elif line.startswith("-") and line != '-':
-            compared_tree.append(f"\\textcolor{{red}}{{{line[2:]}}}")
             score += 1
+            first_tree.append(f"\\textcolor{{red}}{{{line[2:]}}}")
         else:
-            compared_tree.append(line.strip())
-    return compared_tree, 1 - score / total
+            first_tree.append(line.strip())
+            second_tree.append(line.strip())
+    return first_tree, second_tree, 1 - score / total
 
 
 class PostfixToInfix:
@@ -41,12 +43,12 @@ class PostfixToInfix:
 
     # Operation priorities
     precedence = {
-        '+': 1, '-': 1,
+        '+': 1, '-': 1, '\\pm': 1,
         '*': 2, '/': 2,
         '^': 3
     }
     # Handled functions
-    func = ['\\sin', '\\cos', '\\tan', '\\log', '\\sqrt']
+    func = ['\\sin', '\\cos', '\\tan', '\\log', '\\sqrt', '#']
 
     def __init__(self):
         pass
@@ -68,6 +70,8 @@ class PostfixToInfix:
                 stack.append(token)
             elif clear_token in self.func:  # Handling functions such as sin
                 arg = stack.pop()
+                if clear_token == '#':
+                    token = token.replace('#', '-')
                 stack.append(f"{token}{{{arg}}}")
             elif clear_token == '\\frac':  # Handling 'frac' diffrently because of its formula structure
                 left = stack.pop()
@@ -95,7 +99,7 @@ class PostfixToInfix:
 
         :param operand: Operand that needs to be wrapped up in braces
         :param parent_op: Parent node's operator
-        :return:
+        :return: Operand
         """
 
         clear_operand = re.sub(r'\\textcolor\s*{\w+}\s*{([^}]*)}', r'\1', operand)
@@ -130,19 +134,13 @@ def analyze(first_str, second_str):
 
     :param first_str: First latex string formula
     :param second_str: Second latex string formula
-    :return: Latex string formula that shows diffrencies between two formulas
+    :return: Two latex strings showing diffrances between two formulas and simmilarity score
     """
+
     tree1 = latex_to_traversed(first_str)
     tree2 = latex_to_traversed(second_str)
 
-    diff_tree, score = find_diffrencies(tree1, tree2)
-    diff_str = traversed_to_latex(diff_tree)
+    diff_tree1, diff_tree2, score = find_diffrencies(tree1, tree2)
+    diff_str1, diff_str2 = traversed_to_latex(diff_tree1), traversed_to_latex(diff_tree2)
 
-    return diff_str, score
-
-
-
-if __name__ == '__main__':
-    first_str = '\\sqrt{2*b+3*a}'
-    second_str = '\\sqrt{3*a+2*b}'
-    print(analyze(first_str, second_str))
+    return diff_str1, diff_str2, score

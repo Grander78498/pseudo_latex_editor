@@ -24,10 +24,11 @@ def tokenize(latex: str):
 
     # Regular expressions to match operators, variables, numbers, functions, braces, etc.
     token_specification = [
+        ('VAR', r'[a-zA-Z][a-zA-Z0-9]*'),  # Variables (single letters)
         ('NUMBER', r'\d+(\.\d*)?'),  # Numbers (integers or decimals)
         ('FUNC', r'\\[a-zA-Z]+'),  # LaTeX functions like \sin, \cos
-        ('VAR', r'[a-zA-Z]'),  # Variables (single letters)
-        ('OP', r'[\+\-\*/\^]'),  # Operators
+        ('UNARY_MINUS', r'(?<![0-9a-zA-Z)\]}])\s*-\s*(?=[0-9a-zA-Z({])'),  # Unary minus
+        ('OP', r'(\+|\*|\^|(?<=[0-9a-zA-Z)\]}])\s*([+\-*/])\s*(?=[0-9a-zA-Z({]))'),  # Operators
         ('LPAREN', r'\('),  # Left parenthesis
         ('RPAREN', r'\)'),  # Right parenthesis
         ('LBRACE', r'\{'),  # Left curly brace
@@ -41,6 +42,7 @@ def tokenize(latex: str):
     for match in re.finditer(token_regex, latex):
         kind = match.lastgroup
         value = match.group()
+
         if kind == 'SKIP':
             continue
         elif kind == 'MISMATCH':
@@ -73,7 +75,9 @@ class LatexParser:
         Checks next token
         :return: (token type, token value)
         """
+
         if self.pos < len(self.tokens):
+
             return self.tokens[self.pos]
         return None
 
@@ -90,10 +94,10 @@ class LatexParser:
         """
         Handles addition and subtraction
         """
-        node = self.term()
-        while self.peek() and self.peek()[1] in ('+', '-'):
+        node = self.factor()
+        while self.peek() and (self.peek()[0] == 'OP' or self.peek()[1] == '\\pm'):
             op = self.consume()[1]
-            right = self.term()
+            right = self.factor()
             node = Node(op, node, right)
         return node
 
@@ -120,6 +124,11 @@ class LatexParser:
         if kind == 'NUMBER' or kind == 'VAR':
             self.consume()
             return Node(value)
+
+        elif kind == 'UNARY_MINUS':
+            func = self.consume()[1]
+            arg = self.factor()
+            return Node('#', arg)
 
         elif kind == 'FUNC' and value == '\\frac':
             self.consume()
@@ -168,11 +177,6 @@ class LatexParser:
                 return node
             else:
                 raise SyntaxError("Missing closing brace")
-
-        elif kind == 'OP' and value == '-':
-            self.consume()
-            node = self.factor()
-            return Node('-', None, node)
 
         else:
             raise SyntaxError(f"Unexpected token: {value}")
