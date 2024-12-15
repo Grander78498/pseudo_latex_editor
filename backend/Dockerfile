@@ -2,6 +2,7 @@ FROM python:3.12
 
 ADD requirements.txt /requirements.txt
 
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 RUN pip install -r requirements.txt
 
 ENV DB_HOST=pgdb

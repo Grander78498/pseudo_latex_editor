@@ -64,9 +64,6 @@ stringzilla==3.11.1
 sympy==1.13.1
 timm==0.5.4
 tokenizers==0.21.0
-torch==2.5.1+cpu
-torchaudio==2.5.1+cpu
-torchvision==0.20.1+cpu
 tqdm==4.67.1
 transformers==4.47.0
 typer==0.15.1
