@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 
 
-export default function useFetch(url) {
+export default function useFetch({url, method, body}) {
     const [response, setResponse] = useState(null);
     const [isPending, setPending] = useState(true);
     const [isError, setError] = useState(true);
 
     useEffect(() => {
         let interval = setInterval(() => {
-            fetch(url)
+            fetch(url, {method, body})
             .then(async (resp) => {
                 let json = await resp.json();
                 setResponse(json);

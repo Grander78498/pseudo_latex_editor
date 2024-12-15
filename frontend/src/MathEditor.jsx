@@ -1,20 +1,21 @@
 import { MathJax } from "better-react-mathjax";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Buttons from "./Buttons.jsx";
-import EditorFooter from "./EditorFooter.jsx";
+import Button from "react-bootstrap/Button";
 import Stack from "react-bootstrap/Stack";
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
 import debounce from './utils.js';
 
 const maxHistoryLength = 100;
 
-const MathEditor = () => {
-    const textareaRef = useRef(null);
+const MathEditor = ({showSave, textareaRef}) => {
+    if (!textareaRef) textareaRef = useRef(null);
     const [formula, setFormula] = useState("");
     const [history, setHistory] = useState([""]);
     const [_, setCurrentPos] = useState(0);
-
+    
     let result;
-
     const getSelections = (text) => {
         if (result) return result;
         
@@ -39,7 +40,7 @@ const MathEditor = () => {
         return result;
     }
 
-    const changeFormula = (f) => {
+    const updateHistory = useCallback(debounce((f) => {
         if (history) setHistory(old => {
             let res = old.concat(f.replaceAll(/\?/g, ""));
             if (res.length > maxHistoryLength) res.shift();
@@ -47,6 +48,10 @@ const MathEditor = () => {
             return res;
         });
         else setHistory([f]);
+    }), 500);
+
+    const changeFormula = (f) => {
+        updateHistory(f);
         setFormula(f);
     }
 
@@ -131,25 +136,50 @@ const MathEditor = () => {
     }
 
     return (
-    <Stack gap={3}>
-        <textarea
-        ref={textareaRef}
-        rows={10}
-        cols={50}
-        placeholder="Введите вашу формулу..."
-        onChange={e => {
-            changeFormula(e.target.value);
-        }}
-        onKeyDown={e => {
-            handleKeyEvent(e)
-        }}
-        />
-        <Buttons handleButtonClick={handleButtonClick}/>
+        <Form as={Stack} gap={2} className="w-75 mx-auto justify-content-center"
+              style={{maxWidth: showSave ? "100%" : "50%"}}>
+        <Form.Group className="mb-3">
+          <Form.Label>Формула</Form.Label>
+          <Form.Control
+            as={"textarea"}
+            ref={textareaRef}
+            rows={5}
+            cols={showSave ? 50 : 30} // Уменьшаем ширину в зависимости от showSave
+            placeholder="Введите вашу формулу..."
+            className={showSave ? "" : "col-md-6"} // Уменьшаем ширину в зависимости от showSave
+            onChange={(e) => {
+              changeFormula(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              handleKeyEvent(e);
+            }}
+            style={{ maxWidth: showSave ? "100%" : "100%" }} // Уменьшаем максимальную ширину
+          />
+        </Form.Group>
+      
+        <Buttons handleButtonClick={handleButtonClick} />
+      
         <MathJax dynamic>
-            <span>{`$$${formula.replaceAll(/\{\}/g, "{?}")}$$`}</span>
+          <span>{`$$${formula.replaceAll(/\{\}/g, "{?}")}$$`}</span>
         </MathJax>
-        <EditorFooter formulaRef={textareaRef}/>
-    </Stack>
+      
+        {showSave && (
+          <>
+            <Form.Group as={Row} className="d-flex flex-column align-items-center">
+              <Form.Label>Название формулы</Form.Label>
+              <Form.Control className={showSave ? "w-50" : "w-25"} /> {/* Уменьшаем ширину в зависимости от showSave */}
+            </Form.Group>
+            <Stack direction="horizontal" gap={3} className="justify-content-center">
+              <Button variant="primary" size="sm">
+                Сохранить
+              </Button>
+              <Button variant="danger" size="sm">
+                Сбросить
+              </Button>
+            </Stack>
+          </>
+        )}
+      </Form>
     );
 };
 

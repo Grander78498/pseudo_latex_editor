@@ -12,7 +12,9 @@ import Stack from "react-bootstrap/Stack";
 export default function Buttons({handleButtonClick}) {
     const host = import.meta.env.VITE_API_HOST ? import.meta.env.VITE_API_HOST : env.API_HOST;
     const port = import.meta.env.VITE_API_PORT ? import.meta.env.VITE_API_PORT : env.API_PORT;
-    const [result, isPending, isError] = useFetch(`http://${host}:${port}/api/expressions`);
+    const url = `http://${host}:${port}/api/expressions`;
+    const method = 'GET';
+    const [result, isPending, isError] = useFetch({url});
     const exprs = result ? result.expressions : null;
     const groups = result ? result.groups : null;
 
@@ -38,7 +40,7 @@ export default function Buttons({handleButtonClick}) {
                                             handleButtonClick={handleButtonClick}
                                             key={index}
                                             title={<MathJax>
-                                                <span className="sm">{`\\(${f.main_expr.replaceAll(/\{\}/g, "{?}")}\\)`}</span>
+                                                <span className="sm">{`\\(${f.main_expr.replaceAll(/\{\}/g, "")}\\)`}</span>
                                             </MathJax>}
                             />
                 })}

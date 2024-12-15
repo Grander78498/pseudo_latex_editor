@@ -13,8 +13,8 @@ function App() {
         <Stack gap={3} className='justify-content-center'>
           <Header />
           <Routes>
-            <Route index element={<MathEditor/>}/>
-            <Route path='/editor' element={<MathEditor/>}/>
+            <Route index element={<MathEditor showSave={true}/>}/>
+            <Route path='/editor' element={<MathEditor showSave={true}/>}/>
             <Route path='/analyser' element={<MathAnalyser/>}/>
           </Routes>
         </Stack>

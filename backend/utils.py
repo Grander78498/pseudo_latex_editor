@@ -64,7 +64,7 @@ def color_diffrencies(tree1, tree2):
     return compared_tree
 
 
-def rebuild_tree(flat_list):
+def rebuild_tree_color(flat_list):
     """
     Построение латех строки по списку вершин дерева
     """
@@ -74,42 +74,64 @@ def rebuild_tree(flat_list):
         '-': lambda a, b: f"{a} - {b}",
         '*': lambda a, b: f"{a} \\cdot {b}" if a.isdigit() or b.isdigit() else f"{a} {b}",
         '/': lambda a, b: f"{a} / {b}",
-        '^': lambda a, b: f"{a} ^ {b}",
+        '^': lambda a, b: f"{a} ^ {{{b}}}",
         '\\frac': lambda a, b: f"\\frac{{{a}}}{{{b}}}",
         '-u': lambda a: f"-{a}",
-        '\\sin': lambda a: f"\\sin{{{a}}}",
-        '\\cos': lambda a: f"\\cos{{{a}}}",
-        '\\tan': lambda a: f"\\tan{{{a}}}",
-        '\\log': lambda a: f"\\log{{{a}}}",
-        '\\sqrt': lambda a: f"\\sqrt{{{a}}}",
+        '\sin': lambda a: f"\\sin{{({a})}}",
+        '\cos': lambda a: f"\\cos{{({a})}}",
+        '\tan': lambda a: f"\\tan{{({a})}}",
+        '\log': lambda a: f"\\log{{({a})}}",
+        '\sqrt': lambda a: f"\\sqrt{{({a})}}",
         '(': lambda a: f"({a})",
         '{': lambda a: f"{{{a}}}"
     }
 
-    def helper(index):
-        token = flat_list[index]
-        if 'textcolor' in token and index + 1 < len(flat_list):
-            child, index = helper(index + 1)
-            return token + child, index
+    def helper(index, color=None):
+        """
+        Recursive helper function to rebuild the tree.
+        :param index: Current index in the flat list.
+        :return: A tuple (reconstructed subtree, next index to process).
+        """
 
-        if token in operator_map:
-            num_args = operator_map[token].__code__.co_argcount
+        token = flat_list[index]
+
+        match = re.match(r'\\textcolor\s*{(\w+)}\s*{([^}]*)}', token)
+        if match:
+          color = match.group(1)
+          token = match.group(2)
+
+
+        if token in operator_map:  # If the token is an operator/function
+            num_args = operator_map[token].__code__.co_argcount  # Get the required number of arguments
             next_index = index + 1
-            if num_args == 1:
-                child, next_index = helper(next_index)
-                return operator_map[token](child), next_index
-            elif num_args == 2:
-                child1, next_index = helper(next_index)
-                child2, next_index = helper(next_index)
-                return operator_map[token](child1, child2), next_index
+            if num_args == 1:  # Unary operator (e.g., sin, cos)
+              child, next_index = helper(next_index)
+
+              if color:
+                return f'\\textcolor{{{color}}}{operator_map[token](child)}', next_index
+
+              return operator_map[token](child), next_index
+
+            elif num_args == 2:  # Binary operator (e.g., add, mul)
+              child1, next_index = helper(next_index)
+              child2, next_index = helper(next_index)
+
+              if color:
+                return f'{child1} \\textcolor{{{color}}}{{{token}}} {child2}', next_index
+
+              return operator_map[token](child1, child2), next_index
+
+        if color:
+          return f'\\textcolor{{{color}}}{{{token}}}', index + 1
 
         return token, index + 1
 
+    # Start the recursive rebuilding from the first element
     index = 0
     tree = ''
     while index != len(flat_list):
-        new_tree, index = helper(index)
-        tree += new_tree
+      new_tree, index = helper(index)
+      tree += new_tree
     return tree
 
 
@@ -262,4 +284,4 @@ def find_diffrencies(first_str, second_str):
 
     res_diff = color_diffrencies(tree1, tree2)
 
-    return rebuild_tree(res_diff)
+    return rebuild_tree_color(res_diff)
