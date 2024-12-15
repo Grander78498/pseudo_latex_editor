@@ -13,5 +13,6 @@ ENV DB_PASSWORD=postgres
 RUN mkdir -p /app/backend
 WORKDIR /app/backend
 ADD . /app/backend/
+RUN chmod +x /app/backend/entrypoint.sh
 
 ENTRYPOINT [ "/app/backend/entrypoint.sh" ]

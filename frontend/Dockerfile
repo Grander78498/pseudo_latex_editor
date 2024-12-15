@@ -13,6 +13,7 @@ RUN npm install
 
 WORKDIR /app/frontend
 ADD . /app/frontend
+RUN chmod +x /app/frontend/entrypoint.sh
 
 RUN npm run build && npm install -g serve
 
