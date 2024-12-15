@@ -1,15 +1,18 @@
 import { MathJax } from "better-react-mathjax";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Buttons from "./Buttons.jsx";
+import UploadPhoto from "./UploadPhoto.jsx";
 import Button from "react-bootstrap/Button";
 import Stack from "react-bootstrap/Stack";
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import debounce from './utils.js';
+import Container from "react-bootstrap/Container";
+import Col from "react-bootstrap/Col";
 
 const maxHistoryLength = 100;
 
-const MathEditor = ({showSave, textareaRef}) => {
+const MathEditor = ({showSave, textareaRef, index, upload}) => {
     if (!textareaRef) textareaRef = useRef(null);
     const [formula, setFormula] = useState("");
     const [history, setHistory] = useState([""]);
@@ -48,7 +51,7 @@ const MathEditor = ({showSave, textareaRef}) => {
             return res;
         });
         else setHistory([f]);
-    }), 500);
+    }, 500), []);
 
     const changeFormula = (f) => {
         updateHistory(f);
@@ -136,14 +139,21 @@ const MathEditor = ({showSave, textareaRef}) => {
     }
 
     return (
-        <Form as={Stack} gap={2} className="w-75 mx-auto justify-content-center"
-              style={{maxWidth: showSave ? "100%" : "50%"}}>
+        <Form as={Stack} gap={1} className="w-75 mx-auto justify-content-center"
+              style={{maxWidth: showSave ? "100%" : "75%"}}>
         <Form.Group className="mb-3">
-          <Form.Label>Формула</Form.Label>
+          <Form.Label>
+            <Container direction="horizontal" className="d-flex jusitfy-content-between">
+                <Row>
+                    <Col>Формула{index ? " " + index: ""}</Col>
+                    <Col>{upload && <UploadPhoto setFormula={insertTextAtCursor}/>}</Col>
+                </Row>
+            </Container>
+            </Form.Label>
           <Form.Control
             as={"textarea"}
             ref={textareaRef}
-            rows={5}
+            rows={upload ? 3: 5}
             cols={showSave ? 50 : 30} // Уменьшаем ширину в зависимости от showSave
             placeholder="Введите вашу формулу..."
             className={showSave ? "" : "col-md-6"} // Уменьшаем ширину в зависимости от showSave

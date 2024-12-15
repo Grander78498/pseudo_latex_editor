@@ -1,15 +1,18 @@
 from typing import Annotated, AsyncGenerator
 from itertools import product
-from fastapi import FastAPI, Depends
+import PIL.Image
+from fastapi import FastAPI, Depends, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 from sqlalchemy.sql.operators import is_
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
+import PIL
 from contextlib import asynccontextmanager
 from .models import init_db, get_session
 from .models import Formula, Expression, ExpressionGroup
-from .utils import find_diffrencies
+from .analyzer import analyze
+from .latex_ocr import get_latex
 
 
 class FormulaBody(BaseModel):
@@ -62,4 +65,12 @@ async def get_expressions(session: Annotated[Session, Depends(get_session)]):
 
 @app.post('/api/analyse')
 async def analyse_formulas(formulas: FormulaBody):
-    return {'diff': find_diffrencies(formulas.first_formula, formulas.second_formula)}
+    diff, score = analyze(formulas.first_formula, formulas.second_formula)
+    return {'diff': diff, 'score': round(score * 100, 2)}
+
+
+@app.post('/api/upload_photo')
+async def convert_photo_latex(file: UploadFile):
+    with PIL.Image.open(file.file) as im:
+        latex_string = get_latex(im)
+    return {'result': latex_string}

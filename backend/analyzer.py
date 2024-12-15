@@ -1,6 +1,6 @@
 import re
 from difflib import ndiff
-from latex_parser import latex_to_traversed
+from .latex_parser import latex_to_traversed
 
 
 """
@@ -141,6 +141,8 @@ def analyze(first_str, second_str):
     return diff_str, score
 
 
-first_str = '\\sqrt{2*b+3*a}'
-second_str = '\\sqrt{2*b+3*a}'
-print(analyze(first_str, second_str))
+
+if __name__ == '__main__':
+    first_str = '\\sqrt{2*b+3*a}'
+    second_str = '\\sqrt{3*a+2*b}'
+    print(analyze(first_str, second_str))

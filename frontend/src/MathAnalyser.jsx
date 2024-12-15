@@ -10,18 +10,17 @@ export default function MathAnalyser() {
     const firstRef = useRef(null);
     const secondRef = useRef(null);
     const [analyseResult, setResult] = useState(null);
+    const [score, setScore] = useState(null);
     const host = import.meta.env.VITE_API_HOST ? import.meta.env.VITE_API_HOST : env.API_HOST;
     const port = import.meta.env.VITE_API_PORT ? import.meta.env.VITE_API_PORT : env.API_PORT;
     const url = `http://${host}:${port}/api/analyse`;
     const method = 'POST';
 
     const sendData = () => {
-        console.log(firstRef.current.value);
         let body = {'first_formula': firstRef.current.value,
                         'second_formula': secondRef.current.value
         }
         body = JSON.stringify(body);
-        console.log(body)
         fetch(url, {method, body, headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
@@ -29,6 +28,7 @@ export default function MathAnalyser() {
         .then(async (resp) => {
             let json = await resp.json();
             setResult(json.diff);
+            setScore(json.score);
             return json;
         })
         .catch(e => {
@@ -39,8 +39,8 @@ export default function MathAnalyser() {
     return (
         <>
         <Stack direction="horizontal" gap={3}>
-            <MathEditor showSave={false} textareaRef={firstRef}/>
-            <MathEditor showSave={false} textareaRef={secondRef}/>
+            <MathEditor index={1} showSave={false} textareaRef={firstRef}/>
+            <MathEditor index={2} showSave={false} textareaRef={secondRef} upload={true}/>
         </Stack>
         <Button onClick={() => sendData()}>Сравнить</Button>
         <div>
@@ -48,6 +48,7 @@ export default function MathAnalyser() {
             {analyseResult && <MathJax dynamic>
                 <span>{`$$${analyseResult.replaceAll(/\{\}/g, "{?}")}$$`}</span>
                 </MathJax>}
+            <p><strong>Процент совпадения:</strong> {score}%</p>
         </div>
         </>
     )

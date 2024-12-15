@@ -7,6 +7,7 @@ Create Date: 2024-12-11 14:43:42.451435
 """
 from typing import Sequence, Union
 import json
+import csv
 
 from alembic import op
 import sqlalchemy as sa
@@ -28,7 +29,7 @@ def upgrade() -> None:
     sa.Column('main_expr', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('formula',
+    formula_table = op.create_table('formula',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('formula', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -44,6 +45,11 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['group_id'], ['expr_group.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+
+    with open('formula.csv', 'r', encoding='utf-8') as csvfile:
+        csv_reader = csv.DictReader(csvfile, delimiter=";")
+        formulas = [formula_dict for formula_dict in csv_reader]
+    op.bulk_insert(formula_table, formulas)
 
     with open("expressions.json", "r", encoding="utf-8") as file:
         data = json.load(file)
