@@ -10,7 +10,7 @@ services:
   
   frontend:
     build: ./frontend
-    command: serve -s dist
+    command: npm run dev -- --host 0.0.0.0
     expose:
       - 3000
     depends_on:

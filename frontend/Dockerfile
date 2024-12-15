@@ -16,6 +16,5 @@ ADD . /app/frontend
 RUN chmod +x /app/frontend/entrypoint.sh
 
 RUN npm run build
-RUN npm install serve
 
 ENTRYPOINT [ "/app/frontend/entrypoint.sh" ]
