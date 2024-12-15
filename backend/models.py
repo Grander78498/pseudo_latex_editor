@@ -6,16 +6,11 @@
 import os
 import json
 from typing import AsyncGenerator
-from pathlib import Path
-from dotenv import load_dotenv
 from sqlmodel import Field, SQLModel, Relationship, select, insert, update
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-load_dotenv(Path().absolute().parent /
-            os.environ.get('ENV_FILE', default='.env'),
-            override=True)
 db_host = os.environ.get('DB_HOST', default='localhost')
 db_port = os.environ.get('DB_PORT', default='5432')
 db_name = os.environ.get('DB_NAME')

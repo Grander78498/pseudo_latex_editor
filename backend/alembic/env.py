@@ -1,13 +1,10 @@
 import os
 from logging.config import fileConfig
-from pathlib import Path
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-
-from dotenv import load_dotenv
 from models import SQLModel
 
 # this is the Alembic Config object, which provides
@@ -29,9 +26,6 @@ target_metadata = SQLModel.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-load_dotenv(Path().absolute().parent /
-                os.environ.get('ENV_FILE', default='.env'),
-                override=True)
 db_host = os.environ.get('DB_HOST', default='localhost')
 db_port = os.environ.get('DB_PORT', default='5432')
 db_name = os.environ.get('DB_NAME')
