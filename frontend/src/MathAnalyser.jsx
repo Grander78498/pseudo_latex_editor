@@ -45,10 +45,17 @@ export default function MathAnalyser() {
         <Button onClick={() => sendData()}>Сравнить</Button>
         <div>
             <h3>Результат:</h3>
-            {analyseResult && <MathJax dynamic>
-                <span>{`$$${analyseResult.replaceAll(/\{\}/g, "{?}")}$$`}</span>
-                </MathJax>}
-            <p><strong>Процент совпадения:</strong> {score}%</p>
+            {analyseResult && <>
+                {analyseResult.map((diff, index) => {
+                    return (
+                    <MathJax dynamic key={index}>
+                    <span>{`$$${diff.replaceAll(/\{\}/g, "{?}")}$$`}</span>
+                    </MathJax>
+                )}
+                )}
+                <p><strong>Процент совпадения:</strong> {score}%</p>
+            </>
+            }
         </div>
         </>
     )

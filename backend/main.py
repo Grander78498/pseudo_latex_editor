@@ -76,8 +76,8 @@ async def get_expressions(session: Annotated[AsyncSession, Depends(get_session)]
 
 @app.post('/api/analyse')
 async def analyse_formulas(formulas: FormulaAnalysisBody):
-    diff, score = analyze(formulas.first_formula, formulas.second_formula)
-    return {'diff': diff, 'score': round(score * 100, 2)}
+    diff1, diff2, score = analyze(formulas.first_formula, formulas.second_formula)
+    return {'diff': [diff1, diff2], 'score': round(score * 100, 2)}
 
 
 @app.post('/api/upload_photo')

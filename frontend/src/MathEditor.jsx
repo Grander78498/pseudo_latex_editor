@@ -177,7 +177,7 @@ const MathEditor = ({showSave, textareaRef, index, upload}) => {
                 </Row>
             </Container>
             </Form.Label>
-          <AddButton></AddButton>
+          {showSave && <AddButton/>}
           <Form.Control
             as={"textarea"}
             ref={textareaRef}
