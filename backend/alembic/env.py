@@ -28,7 +28,7 @@ target_metadata = SQLModel.metadata
 # ... etc.
 db_host = os.environ.get('DB_HOST', default='localhost')
 db_port = os.environ.get('DB_PORT', default='5432')
-db_name = os.environ.get('DB_NAME')
+db_name = os.environ.get('DB_NAME', default='db_formula')
 if db_name is None:
     raise OSError('База данных не указана в переменных среды.'
                 '\nПроверьте, что она указана в переменной DB_NAME')

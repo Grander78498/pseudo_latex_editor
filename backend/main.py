@@ -3,7 +3,8 @@ from itertools import product
 import PIL.Image
 from fastapi import FastAPI, Depends, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import Session, select
+from sqlmodel import select, insert
+from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.operators import is_
 from sqlalchemy.orm import selectinload
 from pydantic import BaseModel
@@ -15,9 +16,19 @@ from .analyzer import analyze
 from .latex_ocr import get_latex
 
 
-class FormulaBody(BaseModel):
+class FormulaAnalysisBody(BaseModel):
     first_formula: str
     second_formula: str
+
+
+class ExpressionBody(BaseModel):
+    name: str
+    expr: str
+
+
+class FormulaBody(BaseModel):
+    name: str
+    formula: str
 
 
 
@@ -47,14 +58,14 @@ async def main() -> dict[str, str]:
     return {"message": "Hello world"}
 
 
-@app.get('/api/formula')
-async def get_formulas(session: Annotated[Session, Depends(get_session)]) -> list[Formula]:
+@app.get('/api/formulas')
+async def get_formulas(session: Annotated[AsyncSession, Depends(get_session)]):
     formulas = await session.exec(select(Formula))
-    return formulas
+    return {'formulas': formulas.all()}
 
 
 @app.get('/api/expressions')
-async def get_expressions(session: Annotated[Session, Depends(get_session)]):
+async def get_expressions(session: Annotated[AsyncSession, Depends(get_session)]):
     exprs = await session.exec(select(Expression).where(is_(Expression.group_id, None)))
     groups = (await session.exec(select(ExpressionGroup).options(selectinload(ExpressionGroup.expressions)))).all()
     return {"expressions": exprs.all(),
@@ -64,7 +75,7 @@ async def get_expressions(session: Annotated[Session, Depends(get_session)]):
 
 
 @app.post('/api/analyse')
-async def analyse_formulas(formulas: FormulaBody):
+async def analyse_formulas(formulas: FormulaAnalysisBody):
     diff, score = analyze(formulas.first_formula, formulas.second_formula)
     return {'diff': diff, 'score': round(score * 100, 2)}
 
@@ -73,4 +84,20 @@ async def analyse_formulas(formulas: FormulaBody):
 async def convert_photo_latex(file: UploadFile):
     with PIL.Image.open(file.file) as im:
         latex_string = get_latex(im)
+        latex_string = latex_string.replace('\\left', '').replace('\\right', '') \
+                                   .replace('(', '{(').replace(')', ')}')
     return {'result': latex_string}
+
+
+@app.post('/api/post/expr')
+async def add_expression(expression: ExpressionBody, session: Annotated[AsyncSession, Depends(get_session)]):
+    await session.exec(insert(Expression).values(name=expression.name, expr=expression.expr))
+    await session.commit()
+    return {'msg': "Good"}
+
+
+@app.post('/api/post/formula')
+async def add_formula(formula: FormulaBody, session: Annotated[AsyncSession, Depends(get_session)]):
+    await session.exec(insert(Formula).values(name=formula.name, formula=formula.formula))
+    await session.commit()
+    return {'msg': "Good"}

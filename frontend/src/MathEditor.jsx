@@ -9,6 +9,9 @@ import Row from 'react-bootstrap/Row';
 import debounce from './utils.js';
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
+import Formulas from "./Formulas.jsx";
+import env from './env.json';
+import AddButton from "./AddButton.jsx";
 
 const maxHistoryLength = 100;
 
@@ -16,6 +19,7 @@ const MathEditor = ({showSave, textareaRef, index, upload}) => {
     if (!textareaRef) textareaRef = useRef(null);
     const [formula, setFormula] = useState("");
     const [history, setHistory] = useState([""]);
+    const [name, setName] = useState(null);
     const [_, setCurrentPos] = useState(0);
     
     let result;
@@ -138,9 +142,32 @@ const MathEditor = ({showSave, textareaRef, index, upload}) => {
         }
     }
 
+    const host = import.meta.env.VITE_API_HOST ? import.meta.env.VITE_API_HOST : env.API_HOST;
+    const port = import.meta.env.VITE_API_PORT ? import.meta.env.VITE_API_PORT : env.API_PORT;
+    const url = `http://${host}:${port}/api/post/formula`;
+    const method = 'POST';
+
+    const sendFormula = (e) => {
+        e.preventDefault();
+        const body = JSON.stringify({name, formula});
+        console.log(body);
+        fetch(url, {method, body, headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            }})
+        .then(async (resp) => {
+                let json = await resp.json();
+                console.log(json.msg);
+                return json;
+            })
+        .catch(e => {
+                console.log(e);
+            });
+    }
+
     return (
         <Form as={Stack} gap={1} className="w-75 mx-auto justify-content-center"
-              style={{maxWidth: showSave ? "100%" : "75%"}}>
+              style={{maxWidth: showSave ? "100%" : "75%"}} onSubmit={sendFormula} method="POST">
         <Form.Group className="mb-3">
           <Form.Label>
             <Container direction="horizontal" className="d-flex jusitfy-content-between">
@@ -150,6 +177,7 @@ const MathEditor = ({showSave, textareaRef, index, upload}) => {
                 </Row>
             </Container>
             </Form.Label>
+          <AddButton></AddButton>
           <Form.Control
             as={"textarea"}
             ref={textareaRef}
@@ -177,16 +205,13 @@ const MathEditor = ({showSave, textareaRef, index, upload}) => {
           <>
             <Form.Group as={Row} className="d-flex flex-column align-items-center">
               <Form.Label>Название формулы</Form.Label>
-              <Form.Control className={showSave ? "w-50" : "w-25"} /> {/* Уменьшаем ширину в зависимости от showSave */}
+              <Form.Control onChange={(e) => setName(e.target.value)} />
             </Form.Group>
-            <Stack direction="horizontal" gap={3} className="justify-content-center">
-              <Button variant="primary" size="sm">
-                Сохранить
-              </Button>
-              <Button variant="danger" size="sm">
-                Сбросить
-              </Button>
-            </Stack>
+            <Button variant="primary" size="sm" onClick={sendFormula}>
+            Сохранить
+            </Button>
+            <h3>База формул</h3>
+            <Formulas />
           </>
         )}
       </Form>
